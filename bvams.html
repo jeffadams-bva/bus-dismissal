@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RES Bus Dismissal</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #000000; 
+    }
+    
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Both iframes stack on top of each other */
+    .sheet-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 80vw;
+      height: 80vh;
+      border: none;
+      
+      /* THE ZOOM TRICK */
+      transform: scale(1.35); 
+      transform-origin: top left; 
+      
+      /* We use opacity to hide/show them seamlessly */
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 0.4s ease-in-out; /* Smooth fade effect during transition */
+    }
+
+    /* This class is applied to whichever iframe is currently active */
+    .sheet-frame.active {
+      opacity: 1;
+      z-index: 2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="iframe-container">
+    <!-- Two identical iframes stacked on top of each other -->
+    <iframe id="iframe1" class="sheet-frame active" src="https://https://docs.google.com/spreadsheets/d/1b5y97Ot6cSNL4-YT3S0AbX2sVFX3B3tLp5pYBD-2Jm8/htmlembed?widget=false&headers=false&chrome=false"></iframe>
+    <iframe id="iframe2" class="sheet-frame" src=""></iframe>
+  </div>
+  
+  <script>
+    const baseUrl = "https://https://docs.google.com/spreadsheets/d/1b5y97Ot6cSNL4-YT3S0AbX2sVFX3B3tLp5pYBD-2Jm8/htmlembed?widget=false&headers=false&chrome=false";
+    
+    let activeIframe = document.getElementById('iframe1');
+    let standbyIframe = document.getElementById('iframe2');
+
+    setInterval(function() {
+      // 1. Generate the fresh URL with cache-busting timestamp
+      const freshUrl = baseUrl + '&t=' + new Date().getTime();
+      
+      // 2. Load the fresh data into the hidden background (standby) iframe
+      standbyIframe.src = freshUrl;
+      
+      // 3. Wait until the background iframe is 100% finished loading
+      standbyIframe.onload = function() {
+        // Swap visibility classes
+        standbyIframe.classList.add('active');
+        activeIframe.classList.remove('active');
+        
+        // Swap roles: standby becomes active, active becomes standby
+        const temp = activeIframe;
+        activeIframe = standbyIframe;
+        standbyIframe = temp;
+        
+        // Clear this onload listener so it doesn't trigger again accidentally
+        activeIframe.onload = null;
+      };
+    }, 10000); // Refresh check every 10 seconds
+  </script>
+</body>
+</html>
